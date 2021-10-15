@@ -7,7 +7,7 @@ open System.Reflection
 open System.IO
 
 module Types =
-    let  inline private fullName (a: ^T) = ( ^T: (member FullName: string) a )
+    let inline private fullName (a: ^T) = ( ^T: (member FullName: string) a )
         
     let private excluded (fullName:string) :bool =
         ["System"; "Microsoft"; "Mono.Cecil"; "netstandard"; "NetArchTest.Rules"; "<Module>"; "xunit" ]

@@ -3,8 +3,8 @@ namespace FsArchUnit
 open System.Text.RegularExpressions
 
 type Globbing (m: string -> bool) =        
-    member x.matchFun = m
-    static member New (pattern: string) = 
+    member private x.matchFun = m
+    static member internal New (pattern: string) = 
         Globbing(fun name ->
             let regexPattern = $"^{Regex.Escape(pattern)}$".Replace(@"\*", ".*").Replace(@"\?",".");
             if Regex(regexPattern).Match(name).Success then

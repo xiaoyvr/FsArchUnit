@@ -9,14 +9,14 @@ type Matcher<'a> =
     | NotMatcher of Unary<Matcher<'a>, bool>
     | AndMatcher of Binary<Matcher<'a>, bool>
     | OrMatcher of Binary<Matcher<'a>, bool>
-    with member x.Result =
+    with member internal x.Result =
             match x with
             | SimpleMatcher {Result = r}
             | NotMatcher {Result = r}
             | AndMatcher {Result = r}
             | OrMatcher {Result = r} -> r
 
-module Matcher = 
+module internal Matcher = 
     let rec Exec matcher input =
         match matcher with
             | SimpleMatcher {Value = f; Label = l } ->

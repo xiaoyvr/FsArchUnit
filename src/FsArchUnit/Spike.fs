@@ -28,7 +28,5 @@ module Bla =
                         
                     |> should (HaveDependencyOn("NetArchTest.SampleLibrary.Data"))
                     |> check
-        
-    
-    
+
     
