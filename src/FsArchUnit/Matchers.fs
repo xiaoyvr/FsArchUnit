@@ -18,10 +18,8 @@ module Matchers =
     let HaveNameStartingWith(s: string) =
         Simple (fun t -> t.Name.StartsWith(s) ) $"HaveNameStartingWith {s}"
                             
-//    let HaveNameEndingWith(s: string): Terminal =
-//        fun t -> match t.Name.EndsWith(s) with
-//                    | true -> Pass
-//                    | false -> FailedReasons [$"Name should end with {s}"]
+    let HaveNameEndingWith(s: string) =
+        Simple (fun t -> t.Name.EndsWith(s) ) $"HaveNameEndingWith {s}"
 //
 //    let HaveName(s: string): Terminal =
 //        fun t -> match t.Name.Equals(s, StringComparison.InvariantCultureIgnoreCase) with

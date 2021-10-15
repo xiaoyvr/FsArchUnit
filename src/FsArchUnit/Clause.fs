@@ -32,7 +32,8 @@ module Clause =
 
     let And lhs rhs =
         Matcher.AndMatcher{ Lhs = lhs; Rhs = rhs ;Result = None } 
-    let Or lhs rhs = Matcher.OrMatcher{ Lhs = lhs; Rhs = rhs ;Result = None }
+    let Or lhs rhs =
+        Matcher.OrMatcher{ Lhs = lhs; Rhs = rhs ;Result = None }
 
     let Not m = Matcher.NotMatcher{ Child = m ;Result = None }
     

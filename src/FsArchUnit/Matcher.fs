@@ -28,7 +28,7 @@ module internal Matcher =
                                 | Some(lr), Some(rr) -> Some(lr && rr)
                                 | Some(false), None | None, Some(false) -> Some(false)
                                 | _ -> None 
-                AndMatcher {Lhs = lhs; Rhs = rhs ; Result = result }
+                AndMatcher {Lhs = l; Rhs = r ; Result = result }
             | OrMatcher {Lhs = lhs; Rhs = rhs } ->
                 let l = (Exec lhs input)
                 let r = (Exec rhs input)
@@ -36,10 +36,10 @@ module internal Matcher =
                                 | Some(lr), Some(rr) -> Some(lr || rr)
                                 | Some(true), None | None, Some(true) -> Some(true)
                                 | _ -> None 
-                AndMatcher {Lhs = lhs; Rhs = rhs ; Result = result }
+                OrMatcher {Lhs = l; Rhs = r ; Result = result }
             | NotMatcher {Child = c} ->
                 let r = (Exec c input)
-                NotMatcher {Child = c; Result = Option.map not r.Result}
+                NotMatcher {Child = r; Result = Option.map not r.Result}
 
     let rec Trace matcher =
         match matcher with
