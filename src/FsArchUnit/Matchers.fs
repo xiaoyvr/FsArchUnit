@@ -20,16 +20,12 @@ module Matchers =
                             
     let HaveNameEndingWith(s: string) =
         Simple (fun t -> t.Name.EndsWith(s) ) $"HaveNameEndingWith {s}"
-//
-//    let HaveName(s: string): Terminal =
-//        fun t -> match t.Name.Equals(s, StringComparison.InvariantCultureIgnoreCase) with
-//                    | true -> Pass
-//                    | false -> FailedReasons [$"Name should be {s}"]
-//                    
-//    let HaveNameMatching(pattern: string): Terminal =
-//        fun t -> match Regex(pattern).Match(t.Name).Success with
-//                    | true -> Pass
-//                    | false -> FailedReasons [$"Name should match {pattern}"]
+
+    let HaveName(s: string) =
+        Simple (fun t -> t.Name.Equals(s, StringComparison.InvariantCultureIgnoreCase) ) $"HaveName {s}"
+                    
+    let HaveNameMatching(pattern: string) =
+        Simple (fun t -> Regex(pattern).Match(t.Name).Success ) $"HaveNameMatching {pattern}"
     
     
     type TypeDefinitionProperty =
@@ -52,6 +48,8 @@ module Matchers =
         
     let Be (property: TypeDefinitionProperty) =
         Simple property.Get $"Be {property.ToString()}"
+        
+    let Are = Be
 
     let private ToTypeDefinition(t: Type) =
         let assembly = System.Reflection.Assembly.GetAssembly(t);
@@ -60,8 +58,9 @@ module Matchers =
          
 
         assemblyDef.Modules
-            |> Seq.collect (fun m -> m.Types)
-            |> Seq.find (fun t -> t.IsClass && t.Namespace <> null && t.FullName.Equals(t.FullName))
+                |> Seq.collect (fun m -> m.Types)
+                |> Seq.find (fun td -> td.IsClass && td.Namespace <> null && td.FullName.Equals(t.FullName))
+        
             
     let rec private BaseClasses(t: TypeDefinition) =
         match Option.ofObj t.BaseType with
@@ -73,33 +72,28 @@ module Matchers =
                     yield! (baseType |> BaseClasses )
                 }
     
-    let IsSubclassOf (child: TypeDefinition) (parent: TypeDefinition) =
+    let private IsSubclassOf (child: TypeDefinition) (parent: TypeDefinition) =
         if (parent <> null) then
             child.MetadataToken <> parent.MetadataToken &&
                 child |> BaseClasses |> Seq.exists (fun b -> b.MetadataToken = parent.MetadataToken)
         else
             false
                      
-//    let Inherit(baseClass: Type): Terminal = 
-//        let baseClassDef = baseClass |> ToTypeDefinition
-//        fun t -> match (IsSubclassOf t baseClassDef) with
-//                    | true -> Pass
-//                    | false -> FailedReasons [$"Should be subclass of {baseClass.ToString()}."]
-//
-//
-//    let HaveCustomAttribute(attribute: Type): Terminal = 
-//        fun t -> match (t.CustomAttributes |> Seq.exists (fun a -> attribute.FullName = a.AttributeType.FullName)) with
-//                    | true -> Pass
-//                    | false -> FailedReasons [$"Should has attribute of {attribute.FullName}."]
-//    
-//    
-//    let ImplementInterface (interfaceType: Type ): Terminal =
-//        if (not interfaceType.IsInterface) then
-//            raise (ArgumentException $"The type {interfaceType.FullName} is not an interface.")
-//        else
-//            fun t -> match ( t.Interfaces |> Seq.exists (fun i -> interfaceType.FullName = i.InterfaceType.FullName)) with
-//                        | true -> Pass
-//                        | false -> FailedReasons [$"Should has attribute of {interfaceType.FullName}."]
+    let Inherit(baseClass: Type) =
+        let baseClassDef = baseClass |> ToTypeDefinition
+        Simple (fun t -> (IsSubclassOf t baseClassDef) ) $"Inherit {baseClass.FullName}"
+
+    let ImplementInterface (interfaceType: Type) =
+        if (not interfaceType.IsInterface) then
+            raise (ArgumentException $"The type {interfaceType.FullName} is not an interface.")
+        else
+            Simple (fun t -> ( t.Interfaces |> Seq.exists (fun i -> interfaceType.FullName = i.InterfaceType.FullName)) )
+                $"ImplementInterface {interfaceType.FullName}"
+
+    let HaveCustomAttribute(attribute: Type) =
+        Simple (fun t -> (t.CustomAttributes |> Seq.exists (fun a -> attribute.FullName = a.AttributeType.FullName)))
+                $"HaveCustomAttribute {attribute.FullName}"
+
 
 //    let HaveDependencyOn (m: string -> bool): Matcher =
 //

@@ -37,7 +37,7 @@ module Clause =
 
     let Not m = Matcher.NotMatcher{ Child = m ;Result = None }
     
-    let Check (target:Target)  =
+    let Check target  =
         target.Types
         |> Seq.filter (fun t ->
             match target.Filter with

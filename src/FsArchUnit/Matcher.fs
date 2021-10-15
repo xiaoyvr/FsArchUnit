@@ -1,8 +1,14 @@
 ﻿namespace FsArchUnit
 
-type Terminal<'a, 'b> = {Value: 'a ; Label: string; Result: 'b option}
-type Binary<'b, 'c> = { Lhs : 'b; Rhs: 'b; Result: 'c  option}
-type Unary<'b, 'c> = { Child : 'b; Result: 'c  option}
+type Terminal<'a, 'r> = {Value: 'a ; Label: string; Result: 'r option}
+type Binary<'b, 'r> = { Lhs : 'b; Rhs: 'b; Result: 'r option}
+type Unary<'b, 'r> = { Child : 'b; Result: 'r option}
+
+//type Tree<'a, 'r> =
+//    | Leaf of Terminal<'a, 'r>
+//    | BinaryB of Binary<Tree<'a, 'r>, 'r >
+//    | UnaryB of Unary<Tree<'a, 'r>, 'r >
+
 
 type Matcher<'a> =
     | SimpleMatcher of Terminal<'a -> bool, bool>
@@ -47,15 +53,15 @@ module internal Matcher =
                 Some l
             | AndMatcher {Lhs = lhs; Rhs = rhs } ->
                 match lhs.Result, rhs.Result with
-                    | Some true, Some true -> Some("(" + (Trace lhs).Value + " and " + (Trace rhs).Value + ")")
+                    | Some true, Some true -> Some $"({(Trace lhs).Value} and {(Trace rhs).Value})"
                     | _, Some false -> (Trace rhs)
                     | Some false, _ -> (Trace lhs)
                     | _ -> None                                    
             | OrMatcher {Lhs = lhs; Rhs = rhs } ->
                 match lhs.Result, rhs.Result with
-                    | Some false, Some false -> Some("(" + (Trace lhs).Value + " or " + (Trace rhs).Value + ")")
+                    | Some false, Some false -> Some $"({(Trace lhs).Value} or {(Trace rhs).Value})"
                     | Some true, _ -> (Trace lhs)
                     | _, Some true -> (Trace rhs)
                     | _ -> None
             | NotMatcher {Child = c } ->
-                Some ("not " + (Trace c).Value) 
+                Some $"not {(Trace c).Value}" 
