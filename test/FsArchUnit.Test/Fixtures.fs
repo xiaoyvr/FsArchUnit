@@ -38,6 +38,7 @@ type SuccessCase() =
     interface ISomeInterface    
 type FailCase() = class end
 
+// HaveCustomAttribute
 namespace FsArchUnit.Test.Fixtures.HaveCustomAttribute
 type SomeAttribute() =
     inherit System.Attribute()
@@ -45,3 +46,52 @@ type SomeAttribute() =
 [<Some>]    
 type SuccessCase() = class end
 type FailCase() = class end
+
+
+
+// HaveDependencyOn
+namespace FsArchUnit.Test.Fixtures.HaveDependencyOn
+open System
+type IGenericInterface<'a> = interface end
+type GenericBaseClass<'a> () = class end
+type OneParamAttribute(_someType :Type) = inherit Attribute()
+
+namespace FsArchUnit.Test.Fixtures.HaveDependencyOn.Dependencies
+
+type BaseClass() = class end
+type GenericBaseClass<'a>() = class end
+type ISomeInterface = interface end
+
+
+
+type ISomeGenericInterface<'a> = interface end
+type Model = class end
+
+type SomeAttribute() = inherit System.Attribute()
+
+
+namespace FsArchUnit.Test.Fixtures.HaveDependencyOn.Positives
+open FsArchUnit.Test.Fixtures.HaveDependencyOn
+type CaseInherit() = inherit Dependencies.BaseClass()
+type CaseGenericInherit() = inherit Dependencies.GenericBaseClass<string>()
+type CaseInheritGenericParameter() =
+    inherit GenericBaseClass<Dependencies.Model>()
+type CaseInterface() = interface Dependencies.ISomeInterface
+type CaseGenericInterface() = interface Dependencies.ISomeGenericInterface<string>
+type CaseInterfaceGenericParameter() =
+    interface IGenericInterface<Dependencies.Model>
+
+[<Dependencies.Some>]
+type CaseAttribute() = class end
+
+[<OneParam(typedefof<Dependencies.Model>)>]
+type CaseAttributeParameter() = class end
+
+
+
+namespace FsArchUnit.Test.Fixtures.HaveDependencyOn.Negatives
+open FsArchUnit.Test.Fixtures.HaveDependencyOn
+type Case() = class end
+type CaseGenericInterface() =
+    interface IGenericInterface<Case>
+

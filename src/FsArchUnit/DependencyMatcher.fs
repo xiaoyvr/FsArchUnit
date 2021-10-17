@@ -1,8 +1,10 @@
 namespace FsArchUnit
 
 open Mono.Cecil
+open FsArchUnit
 
-module Matchers =        
+[<AutoOpen>]
+module DependencyMatchers =
     let private memorize fn =
         let cache = System.Collections.Generic.Dictionary<_,_>()
         (fun x ->
@@ -27,15 +29,15 @@ module Matchers =
             parameters |> Seq.map matchFullName
             
         let CheckTypeReference (r:TypeReference) =
-            if r.IsGenericParameter then
-                Seq.empty
-            else
-                match r with
-                    | :? GenericInstanceType as g ->
-                        g.GenericArguments
-                            |> Seq.map matchFullName
-                            |> Seq.append (CheckGenericParameters r.GenericParameters)
-                    |_ -> Seq.singleton (matchFullName r)
+            seq {
+                if not r.IsGenericParameter then
+                    yield matchFullName r
+                    match r with
+                        | :? GenericInstanceType as g ->
+                            yield! (g.GenericArguments |> Seq.map matchFullName)
+                            yield! (CheckGenericParameters r.GenericParameters)
+                        |_ -> do()
+            }
                     
         let CheckTypeReference = memorize CheckTypeReference                
 
@@ -54,6 +56,7 @@ module Matchers =
             }
             
         let CheckProperties (t:TypeDefinition) =
+            
             seq {
                 if t.HasProperties then
                     for property in t.Properties do
@@ -125,9 +128,17 @@ module Matchers =
                             for method in eventDef.OtherMethods do               
                                 yield! CheckMethod(method)    
             }
+            
+        let CheckInterfaces (t:TypeDefinition) =
+            if t.HasInterfaces then
+                t.Interfaces |> Seq.collect (fun i -> CheckTypeReference(i.InterfaceType))
+            else
+                Seq.empty
         
         let CheckTypeDefinition (t:TypeDefinition) =
             seq {
+                yield matchFullName t
+                yield! CheckInterfaces(t)
                 yield! CheckCustomAttributes t.CustomAttributes
                 if (t.BaseType <> null) then
                     yield! CheckTypeReference t.BaseType
@@ -149,6 +160,8 @@ module Matchers =
         let CheckTypeDefinition = memorize CheckTypeDefinition
         
         let CheckDependency t =            
-            CheckTypeDefinition t |> Seq.choose id |> (Seq.isEmpty >> not)
+            CheckTypeDefinition t
+            |> Seq.choose id
+            |> (Seq.isEmpty >> not)
         
         Matchers.Simple CheckDependency $"HaveDependencyOn {g.Label}"

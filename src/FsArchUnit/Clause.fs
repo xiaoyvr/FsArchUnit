@@ -19,7 +19,7 @@ type Target = {
     Matcher: Matcher<TypeDefinition>
 }
 
-
+[<AutoOpen>]
 module Clause =
 //    let inline private uplift (x:^a) : ^b = ((^a or ^b) : (static member op_Implicit : ^a -> ^b) x)
     
@@ -50,6 +50,7 @@ module Clause =
                 match result with
                     | true -> None
                     | false -> Some {TypeName = t.FullName
-                                     Reason = (Matcher.Trace matcherWithResult) |> Option.defaultValue "!!!None!!!"  })
+                                     Reason =  "Should " + ((Matcher.Trace matcherWithResult)
+                                                            |> Option.defaultValue "!!!None!!!")  })
         |> Seq.choose id 
         |> List.ofSeq

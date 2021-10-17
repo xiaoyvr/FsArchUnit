@@ -4,9 +4,7 @@ module FsArchUnit.Test.MatchersTests
 open FsArchUnit
 open Mono.Cecil
 open Xunit
-open FsArchUnit.Matchers
 open FsUnit.Xunit
-open FsArchUnit.Clause
 
 let HaveNameTestData () =
     seq {
@@ -49,8 +47,8 @@ let ``should check Inherit`` () =
                         |> Check
                         
     violations |> should haveLength 1
-    violations.[0].TypeName |> should equal "FsArchUnit.Test.Fixtures.Inherit.SubClasses.FailCase"
-    violations.[0].Reason |> should equal "Inherit FsArchUnit.Test.Fixtures.Inherit.BaseClass"
+    violations.[0].TypeName |> should haveSubstring "FsArchUnit.Test.Fixtures.Inherit.SubClasses.FailCase"
+    violations.[0].Reason |> should haveSubstring "Inherit FsArchUnit.Test.Fixtures.Inherit.BaseClass"
                         
 
 [<Fact>]
@@ -61,8 +59,8 @@ let ``should check ImplementInterface`` () =
                         |> Check
                         
     violations |> should haveLength 1
-    violations.[0].TypeName |> should equal "FsArchUnit.Test.Fixtures.ImplementInterface.FailCase"
-    violations.[0].Reason |> should equal "ImplementInterface FsArchUnit.Test.Fixtures.ImplementInterface.ISomeInterface"
+    violations.[0].TypeName |> should haveSubstring "FsArchUnit.Test.Fixtures.ImplementInterface.FailCase"
+    violations.[0].Reason |> should haveSubstring "ImplementInterface FsArchUnit.Test.Fixtures.ImplementInterface.ISomeInterface"
                         
 [<Fact>]
 let ``should check HaveCustomAttribute`` () =    
@@ -73,8 +71,8 @@ let ``should check HaveCustomAttribute`` () =
                         |> Check
                         
     violations |> should haveLength 1
-    violations.[0].TypeName |> should equal "FsArchUnit.Test.Fixtures.HaveCustomAttribute.FailCase"
-    violations.[0].Reason |> should equal "HaveCustomAttribute FsArchUnit.Test.Fixtures.HaveCustomAttribute.SomeAttribute"
+    violations.[0].TypeName |> should haveSubstring "FsArchUnit.Test.Fixtures.HaveCustomAttribute.FailCase"
+    violations.[0].Reason |> should haveSubstring "HaveCustomAttribute FsArchUnit.Test.Fixtures.HaveCustomAttribute.SomeAttribute"
                         
 
     

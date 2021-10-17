@@ -4,6 +4,7 @@ open System
 open System.Text.RegularExpressions
 open Mono.Cecil
 
+[<AutoOpen>]
 module Matchers =
     let Simple f l = Matcher<TypeDefinition>.SimpleMatcher {Value = f; Label = l; Result = None}
     
