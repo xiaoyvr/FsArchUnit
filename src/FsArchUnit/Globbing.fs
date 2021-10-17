@@ -2,8 +2,9 @@ namespace FsArchUnit
 
 open System.Text.RegularExpressions
 
-type Globbing (m: string -> bool) =        
-    member private x.matchFun = m
+type Globbing (m: string -> bool, label: string) =        
+    member internal x.Label = label
+    member internal x.MatchFunc = m
     static member internal New (pattern: string) = 
         Globbing(fun name ->
             let regexPattern = $"^{Regex.Escape(pattern)}$".Replace(@"\*", ".*").Replace(@"\?",".");
@@ -15,16 +16,13 @@ type Globbing (m: string -> bool) =
                     Regex(newPattern).Match(name).Success
                 else
                     false
-        )
+        , pattern)
        
-    static member (+) (lhs: Globbing, rhs: Globbing) =        
-        Globbing(fun t -> lhs.matchFun(t) || rhs.matchFun(t))
+    static member (+) (lhs: Globbing, rhs: Globbing) =
+        Globbing((fun t -> lhs.MatchFunc(t) || rhs.MatchFunc(t)), $"{lhs.Label} + {rhs.Label}")
         
     static member (-) (lhs: Globbing, rhs: Globbing) =
-        Globbing(fun t ->
-            lhs.matchFun t && ( (rhs.matchFun >> not) t))
-    
-    
+        Globbing ((fun t ->lhs.MatchFunc t && ( (rhs.MatchFunc >> not) t)) , $"{lhs.Label} - {rhs.Label}")
     
 module Globbing =
     //    let inline (!>) (x:^a) : ^b = ((^a or ^b) : (static member op_Implicit : ^a -> ^b) x)

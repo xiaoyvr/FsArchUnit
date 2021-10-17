@@ -12,6 +12,7 @@
         <Compile Include="Types.fs" />
         <Compile Include="Globbing.fs" />
         <Compile Include="Matchers.fs" />
+        <Compile Include="DependencyMatcher.fs" />
     </ItemGroup>
 
     <ItemGroup>
