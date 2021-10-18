@@ -1,4 +1,5 @@
 # FsArchUnit
+[![.NET](https://github.com/xiaoyvr/FsArchUnit/actions/workflows/dotnet.yml/badge.svg)](https://github.com/xiaoyvr/FsArchUnit/actions/workflows/dotnet.yml)
 
 A fsharp API for that can enforce architectural rules in unit tests.
 
