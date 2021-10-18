@@ -2,6 +2,7 @@ namespace FsArchUnit
 
 open Mono.Cecil
 open FsArchUnit
+open Mono.Cecil
 
 [<AutoOpen>]
 module DependencyMatchers =
@@ -28,18 +29,17 @@ module DependencyMatchers =
         let CheckGenericParameters (parameters: GenericParameter seq) =
             parameters |> Seq.map matchFullName
             
-        let CheckTypeReference (r:TypeReference) =
+        let rec RawCheckTypeReference (r:TypeReference) =
             seq {
                 if not r.IsGenericParameter then
                     yield matchFullName r
                     match r with
                         | :? GenericInstanceType as g ->
-                            yield! (g.GenericArguments |> Seq.map matchFullName)
+                            yield! (g.GenericArguments |> Seq.collect CheckTypeReference)
                             yield! (CheckGenericParameters r.GenericParameters)
                         |_ -> do()
             }
-                    
-        let CheckTypeReference = memorize CheckTypeReference                
+        and CheckTypeReference = memorize RawCheckTypeReference                
 
         let CheckCustomAttributes (attrs: CustomAttribute seq) =
             seq {
@@ -47,7 +47,7 @@ module DependencyMatchers =
                     yield! CheckTypeReference(attr.AttributeType)                    
                     let args = attr.Fields
                                |> Seq.append attr.Properties
-                               |> Seq.map (fun na -> na.Argument)
+                               |> Seq.map (fun argument -> argument.Argument)
                                |> Seq.append attr.ConstructorArguments
                     for arg in args do
                         match arg.Value with
@@ -56,22 +56,30 @@ module DependencyMatchers =
             }
             
         let CheckProperties (t:TypeDefinition) =
-            
             seq {
                 if t.HasProperties then
                     for property in t.Properties do
-                        if property.ContainsGenericParameter then
-                            yield! CheckGenericParameters(property.PropertyType.GenericParameters);
                         yield matchFullName property.PropertyType
+                        match property.PropertyType with
+                            | :? GenericInstanceType as gt ->
+                                yield! gt.GenericArguments |> Seq.collect CheckTypeReference
+                            | _ -> do ()
+                        if property.ContainsGenericParameter then
+                            yield! CheckGenericParameters property.PropertyType.GenericParameters
             }
 
         let CheckFields (t:TypeDefinition) =
             seq {
                 if t.HasFields then
-                    for  field in t.Fields do
+                    for field in t.Fields do
+                        yield matchFullName field.FieldType
+                        match field.FieldType with
+                            | :? GenericInstanceType as gt ->
+                                yield! gt.GenericArguments |> Seq.collect CheckTypeReference
+                            | _ -> do ()
                         if field.ContainsGenericParameter then
                             yield! CheckGenericParameters field.FieldType.GenericParameters
-                        yield matchFullName field.FieldType 
+                         
             }
             
         let CheckMethodParameters (parameters:ParameterDefinition seq) =
@@ -109,7 +117,12 @@ module DependencyMatchers =
                 yield! CheckCustomAttributes method.CustomAttributes
                 if method.ReturnType.ContainsGenericParameter then
                     yield! CheckGenericParameters method.ReturnType.GenericParameters
-
+                    
+                match method.ReturnType with
+                    | :? GenericInstanceType as gt ->
+                        yield! gt.GenericArguments |> Seq.collect CheckTypeReference
+                    | _ -> do ()
+                
                 yield matchFullName method.ReturnType
                 
                 yield! CheckMethodParameters method.Parameters
@@ -135,7 +148,7 @@ module DependencyMatchers =
             else
                 Seq.empty
         
-        let CheckTypeDefinition (t:TypeDefinition) =
+        let rec RawCheckTypeDefinition (t:TypeDefinition) =
             seq {
                 yield matchFullName t
                 yield! CheckInterfaces(t)
@@ -149,15 +162,11 @@ module DependencyMatchers =
 
                 yield! CheckFields t
                 yield! CheckEvents t
-
-        //        for nested in t.NestedTypes do
-        //            CheckTypeDefinition nested
                 
                 for method in t.Methods do
-                    yield! CheckMethod method                
-            }
-            
-        let CheckTypeDefinition = memorize CheckTypeDefinition
+                    yield! CheckMethod method
+            } 
+        and CheckTypeDefinition = memorize RawCheckTypeDefinition
         
         let CheckDependency t =            
             CheckTypeDefinition t

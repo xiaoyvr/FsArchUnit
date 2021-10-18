@@ -18,7 +18,8 @@ module Types =
             |> Seq.filter (not << excluded << fullName)  
             |> Seq.collect (fun t ->
                                         let nestedTypes = t.NestedTypes |> Seq.filter (fun nested ->
-                                            not (nested.Interfaces |> Seq.exists (fun i -> i.InterfaceType.FullName = typedefof<IAsyncStateMachine>.FullName)) )
+                                            not (nested.Interfaces |> Seq.exists (fun i ->
+                                                i.InterfaceType.FullName = typedefof<IAsyncStateMachine>.FullName)) )
                                         GetAllTypesWithNested(nestedTypes) |> Seq.append [t])
         
     let private InAssembliesWithFilter (assemblies: Assembly seq) (filter: TypeDefinition -> bool) =

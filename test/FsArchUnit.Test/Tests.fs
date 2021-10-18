@@ -1,8 +1,6 @@
-module Tests
+module FsArchUnit.Test.Tests
 
 open FsArchUnit
-open FsArchUnit.Clause
-open FsArchUnit.Matchers
 open Xunit
 open FsUnit.Xunit
 
@@ -37,7 +35,7 @@ let ``should have reason for violations`` () =
     violations |> should haveLength 1
     let violation = violations.[0]
     violation.TypeName |> should equal "FsArchUnit.Test.Fixtures.F01.Fx1ClassA"
-    violation.Reason |> should equal "HaveNameStartingWith F01"
+    violation.Reason |> should haveSubstring "HaveNameStartingWith F01"
     
 [<Fact>]
 let ``should not need the filter part`` () =
@@ -89,7 +87,7 @@ let ``should be able to fail the check for or condition with reason`` () =
 
     let violation = violations |> List.tryFind (fun v -> v.TypeName = "FsArchUnit.Test.Fixtures.Or.ClassNameEndWithB")
     violation |> should not' None
-    violation.Value.Reason |> should equal "(HaveNameEndingWith A or HaveNameEndingWith C)"
+    violation.Value.Reason |> should haveSubstring "(HaveNameEndingWith A or HaveNameEndingWith C)"
     
 [<Fact>]
 let ``should be able to check the and condition`` () =
@@ -110,7 +108,7 @@ let ``should be able to fail the check for and condition with reason`` () =
                      
     let violation = violations |> List.tryFind (fun v -> v.TypeName = "FsArchUnit.Test.Fixtures.And.ClassA")
     violation |> should not' None
-    violation.Value.Reason |> should equal "HaveNameStartingWith X"
+    violation.Value.Reason |> should haveSubstring "HaveNameStartingWith X"
 
 [<Fact>]
 let ``should be able to check the not condition`` () =    
@@ -121,4 +119,4 @@ let ``should be able to check the not condition`` () =
 
     let violation = violations |> List.tryFind (fun v -> v.TypeName = "FsArchUnit.Test.Fixtures.Not.ClassNameEndWithA")
     violation |> should not' None
-    violation.Value.Reason |> should equal "not HaveNameEndingWith A"
+    violation.Value.Reason |> should haveSubstring "not HaveNameEndingWith A"

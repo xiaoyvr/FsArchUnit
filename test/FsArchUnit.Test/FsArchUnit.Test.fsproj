@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <Compile Include="Fixtures.fs" />
+        <Compile Include="Fixtures.HaveDependencyOn.fs" />
         <Compile Include="Tests.fs" />
         <Compile Include="DependencyTests.fs" />
         <Compile Include="MatchersTests.fs" />
