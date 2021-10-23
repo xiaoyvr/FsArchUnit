@@ -24,8 +24,7 @@ module Types =
         
     let private InAssembliesWithFilter (assemblies: Assembly seq) (filter: TypeDefinition -> bool) =
         assemblies |> Seq.filter (fun a -> not a.IsDynamic) |> Seq.collect (fun a ->
-            
-            UriBuilder(a.CodeBase).Path
+            a.Location
                         |> Uri.UnescapeDataString
                         |> AssemblyDefinition.ReadAssembly
                         |> (fun a -> a.Modules |> Seq.collect (fun m -> m.Types) ))
