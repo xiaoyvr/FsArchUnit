@@ -29,5 +29,5 @@ jobs:
         NUGET_KEY : ${{ secrets.NUGET_KEY }}
       run: |
         version=$(dotnet nbgv get-version -v Version)
-        dotnet pack -p:PackageVersion=$version --no-build -o build/ src/FSArchUnit/FSArchUnit.fsproj
-        dotnet nuget push -s https://api.nuget.org/v3/index.json -k $NUGET_KEY build/FSArchUnit.${version}.nupkg
+        dotnet pack -p:PackageVersion=$version --no-build -o build/ src/FsArchUnit/FsArchUnit.fsproj
+        dotnet nuget push -s https://api.nuget.org/v3/index.json -k $NUGET_KEY build/FsArchUnit.${version}.nupkg
