@@ -30,6 +30,4 @@ jobs:
       run: |
         version=$(dotnet nbgv get-version -v Version)
         dotnet pack -p:PackageVersion=$version --no-build -o build/ src/FsArchUnit/FsArchUnit.fsproj
-        ls build/
-        echo dotnet nuget push -s https://api.nuget.org/v3/index.json -k $NUGET_KEY build/FsArchUnit.${version}.nupkg
         dotnet nuget push -s https://api.nuget.org/v3/index.json -k $NUGET_KEY build/FsArchUnit.${version}.nupkg
