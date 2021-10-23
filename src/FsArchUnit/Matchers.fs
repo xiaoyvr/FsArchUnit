@@ -54,7 +54,7 @@ module Matchers =
 
     let private ToTypeDefinition(t: Type) =
         let assembly = System.Reflection.Assembly.GetAssembly(t);
-        let assemblyDef = Uri.UnescapeDataString(UriBuilder(assembly.CodeBase).Path)
+        let assemblyDef = Uri.UnescapeDataString(assembly.Location)
                             |> AssemblyDefinition.ReadAssembly
          
 
